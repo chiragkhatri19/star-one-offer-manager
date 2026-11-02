@@ -1,7 +1,7 @@
 {
   "name": "star-one-offer-manager",
   "productName": "Star One Offer Manager",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Desktop app for Star One Gym to change the website offer without touching code",
   "author": "Chirag Khatri (chiragships.site)",
   "private": true,

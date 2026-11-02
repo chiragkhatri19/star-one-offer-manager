@@ -1,18 +1,20 @@
-// Star One Offer Manager: edits the website's offer (src/data/offer.json) and publishes it.
+// Star One Offer Manager: edits the website's seasonal offer and publishes it.
 // Two publish targets:
-//   github: commits offer.json to the website repo; Cloudflare Pages rebuilds the site (about 1–2 min).
-//   folder: writes offer.json into a local copy of the website (for testing).
+//   website: reads and writes https://staronegym.com/api/offer (a Cloudflare Pages Function that
+//            stores the offer in KV). Publishing needs the Offer Manager password; the site picks
+//            the change up within about a minute, no rebuild.
+//   folder:  writes src/data/offer.json into a local copy of the website (testing only; set
+//            "mode": "folder" in settings.json by hand).
 const { app, BrowserWindow, ipcMain, safeStorage, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
+const SITE = 'https://staronegym.com';
 const DEFAULTS = {
-  mode: 'github',
-  repo: '',
-  branch: 'main',
-  file: 'src/data/offer.json',
+  mode: 'website',
+  siteUrl: SITE,
   folder: '',
-  siteUrl: 'https://staronegym.in',
+  file: 'src/data/offer.json',
 };
 const userFile = (name) => path.join(app.getPath('userData'), name);
 const readJson = (file, fallback) => {
@@ -23,92 +25,96 @@ const writeJson = (file, data) => {
   fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n');
 };
 
-// ---------- settings (the GitHub token is encrypted with the OS keychain) ----------
+// ---------- settings (the password is encrypted with the OS keychain) ----------
 function loadSettings() {
-  return { ...DEFAULTS, ...readJson(userFile('settings.json'), {}) };
+  const s = { ...DEFAULTS, ...readJson(userFile('settings.json'), {}) };
+  // 1.0.0 published through GitHub and defaulted to the wrong domain
+  if (s.mode !== 'folder') s.mode = 'website';
+  if (!/^https:\/\//.test(s.siteUrl || '') || /staronegym\.in/.test(s.siteUrl)) s.siteUrl = SITE;
+  s.siteUrl = s.siteUrl.replace(/\/+$/, '');
+  delete s.repo; delete s.branch; delete s.tokenEnc;
+  return s;
 }
-function token() {
+function password() {
   const s = loadSettings();
-  if (!s.tokenEnc) return '';
-  try { return safeStorage.decryptString(Buffer.from(s.tokenEnc, 'base64')); } catch { return ''; }
+  if (!s.passEnc) return '';
+  try { return safeStorage.decryptString(Buffer.from(s.passEnc, 'base64')); } catch { return ''; }
 }
 function publicSettings() {
-  const { tokenEnc, ...rest } = loadSettings();
-  return { ...rest, hasToken: Boolean(tokenEnc) };
+  const { passEnc, ...rest } = loadSettings();
+  return { ...rest, hasPass: Boolean(passEnc) };
 }
 function saveSettings(next) {
-  const cur = loadSettings();
-  const merged = { ...cur, ...next };
-  delete merged.token;
-  delete merged.hasToken;
-  if (typeof next.token === 'string' && next.token.trim()) {
-    merged.tokenEnc = safeStorage.encryptString(next.token.trim()).toString('base64');
+  const merged = { ...loadSettings(), ...next };
+  delete merged.pass;
+  delete merged.hasPass;
+  if (typeof next.pass === 'string' && next.pass.trim()) {
+    merged.passEnc = safeStorage.encryptString(next.pass.trim()).toString('base64');
   }
-  if (next.clearToken) delete merged.tokenEnc;
-  delete merged.clearToken;
   writeJson(userFile('settings.json'), merged);
   return publicSettings();
 }
 
 // ---------- targets ----------
-async function gh(method, url, body) {
-  const t = token();
-  if (!t) throw new Error('No GitHub access key saved. Add it in Settings.');
-  const res = await fetch(`https://api.github.com${url}`, {
-    method,
-    headers: {
-      Authorization: `Bearer ${t}`,
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-      'User-Agent': 'star-one-offer-manager',
-      ...(body ? { 'Content-Type': 'application/json' } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const hint = res.status === 401 ? 'The access key is wrong or expired.'
-      : res.status === 404 ? 'Website repository or file not found. Check Settings.'
-      : res.status === 403 ? 'The access key is not allowed to change this repository.'
-      : data.message || `GitHub error ${res.status}`;
-    throw new Error(hint);
+async function api(method, body, pass) {
+  const s = loadSettings();
+  const host = new URL(s.siteUrl).host;
+  let res;
+  try {
+    res = await fetch(`${s.siteUrl}/api/offer`, {
+      method,
+      cache: 'no-store',
+      headers: {
+        'User-Agent': 'star-one-offer-manager',
+        ...(pass ? { Authorization: `Bearer ${pass}` } : {}),
+        ...(body ? { 'Content-Type': 'application/json' } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new Error(`Can't reach ${host}. Check the internet connection and try again.`);
   }
-  return data;
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) throw new Error('The password is wrong. Check it in Settings.');
+  if (!res.ok && !(method === 'GET' && res.status === 404)) throw new Error(data.error || `${host} answered with error ${res.status}. Try again in a minute.`);
+  return res.status === 404 ? null : data;
 }
-const ghPath = (s) => `/repos/${s.repo}/contents/${s.file.split('/').map(encodeURIComponent).join('/')}`;
+const needPass = () => {
+  const p = password();
+  if (!p) throw new Error('Enter the Offer Manager password in Settings first.');
+  return p;
+};
 
 async function readOffer() {
   const s = loadSettings();
   if (s.mode === 'folder') {
-    if (!s.folder) throw new Error('Choose the website folder in Settings.');
-    const raw = fs.readFileSync(path.join(s.folder, s.file), 'utf8');
-    return { offer: JSON.parse(raw), where: path.join(s.folder, s.file) };
+    if (!s.folder) throw new Error('Choose the website folder in settings.json.');
+    const file = path.join(s.folder, s.file);
+    return { offer: JSON.parse(fs.readFileSync(file, 'utf8')), where: file };
   }
-  if (!s.repo) throw new Error('Add the website repository in Settings.');
-  const data = await gh('GET', `${ghPath(s)}?ref=${encodeURIComponent(s.branch)}`);
-  return { offer: JSON.parse(Buffer.from(data.content, 'base64').toString('utf8')), sha: data.sha, where: `${s.repo}@${s.branch}` };
+  const offer = await api('GET');
+  return { offer: offer || { active: false, prices: [] }, where: new URL(s.siteUrl).host };
 }
 
 async function writeOffer(offer) {
   const s = loadSettings();
-  const body = JSON.stringify(offer, null, 2) + '\n';
   if (s.mode === 'folder') {
-    if (!s.folder) throw new Error('Choose the website folder in Settings.');
-    fs.writeFileSync(path.join(s.folder, s.file), body);
-    return { where: path.join(s.folder, s.file) };
+    if (!s.folder) throw new Error('Choose the website folder in settings.json.');
+    const file = path.join(s.folder, s.file);
+    fs.writeFileSync(file, JSON.stringify(offer, null, 2) + '\n');
+    return { where: file };
   }
-  const cur = await readOffer();
-  const msg = offer.active ? `Offer: ${offer.name} (till ${offer.until})` : 'Offer turned off';
-  const res = await gh('PUT', ghPath(s), {
-    message: `${msg} [Offer Manager]`,
-    content: Buffer.from(body, 'utf8').toString('base64'),
-    sha: cur.sha,
-    branch: s.branch,
-  });
-  return { where: `${s.repo}@${s.branch}`, commit: res.commit?.html_url };
+  await api('PUT', offer, needPass());
+  return { where: new URL(s.siteUrl).host };
 }
 
-// ---------- validation (the site trusts this file, so keep it tidy) ----------
+async function testConnection() {
+  const { offer, where } = await readOffer();
+  if (loadSettings().mode !== 'folder') await api('POST', {}, needPass());
+  return { offer, where };
+}
+
+// ---------- validation (same rules as the website's /api/offer) ----------
 const LIMITS = { name: 40, chip: 44, headline: 16, highlight: 14, detail: 70, button: 26, whatsapp: 300 };
 function clean(o) {
   const str = (v, n) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, n);
@@ -139,6 +145,7 @@ const wrap = (fn) => async (_e, ...args) => {
 ipcMain.handle('settings:get', wrap(async () => ({ settings: publicSettings() })));
 ipcMain.handle('settings:save', wrap(async (s) => ({ settings: saveSettings(s) })));
 ipcMain.handle('offer:load', wrap(readOffer));
+ipcMain.handle('settings:test', wrap(testConnection));
 ipcMain.handle('offer:publish', wrap(async (offer) => {
   const tidy = clean(offer);
   const res = await writeOffer(tidy);

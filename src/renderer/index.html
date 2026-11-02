@@ -208,29 +208,17 @@
         <div class="head">
           <p class="eyebrow mono"><span class="tri"></span>Connection</p>
           <h1 class="h1">Settings</h1>
-          <p class="lead">Set up once by Chirag. After that you only use the Offer screen.</p>
+          <p class="lead">Type the password once. After that you only use the Offer screen.</p>
         </div>
 
         <section class="card">
-          <div class="card__head"><span class="card__num mono">01</span><h2>Where offers are published</h2></div>
-          <div class="seg seg--wide" data-mode>
-            <button data-mode-btn="github">Live website (GitHub)</button>
-            <button data-mode-btn="folder">Folder on this PC (testing)</button>
-          </div>
-          <div class="grid" data-mode-pane="github">
-            <label class="field"><span class="field__lbl">Website repository</span><input data-s="repo" placeholder="owner/star-one-gym" /></label>
-            <label class="field"><span class="field__lbl">Branch</span><input data-s="branch" placeholder="main" /></label>
-            <label class="field span2">
-              <span class="field__lbl">GitHub access key <em data-token-state></em></span>
-              <input data-s="token" type="password" placeholder="github_pat_…" autocomplete="off" />
-            </label>
-          </div>
-          <div class="grid" data-mode-pane="folder" hidden>
-            <label class="field span2"><span class="field__lbl">Website folder</span><input data-s="folder" placeholder="C:\project 2026\star-one-gym\website" /></label>
-          </div>
+          <div class="card__head"><span class="card__num mono">01</span><h2>Connect to the website</h2></div>
           <div class="grid">
-            <label class="field"><span class="field__lbl">Offer file inside the website</span><input data-s="file" placeholder="src/data/offer.json" /></label>
-            <label class="field"><span class="field__lbl">Website address</span><input data-s="siteUrl" placeholder="https://staronegym.in" /></label>
+            <label class="field"><span class="field__lbl">Website</span><input data-s="siteUrl" placeholder="https://staronegym.com" spellcheck="false" /></label>
+            <label class="field">
+              <span class="field__lbl">Offer Manager password <em data-pass-state></em></span>
+              <input data-s="pass" type="password" placeholder="Type the password once" autocomplete="off" />
+            </label>
           </div>
           <div class="settings__actions">
             <span class="test mono" data-test></span>
@@ -242,10 +230,10 @@
         <section class="card card--note">
           <h2>How publishing works</h2>
           <ol class="how">
-            <li><b>Publish</b> saves the offer into the website's code on GitHub.</li>
-            <li>Cloudflare sees the change and rebuilds the website by itself.</li>
-            <li>About <b>1–2 minutes</b> later the new offer is live for everyone.</li>
+            <li><b>Publish</b> sends the offer straight to the website.</li>
+            <li>Within about <b>a minute</b> everyone sees the new offer. No waiting for a rebuild.</li>
             <li>After the last day, the offer hides itself. No need to turn it off.</li>
+            <li>The password is saved securely on this computer, so you only type it once.</li>
           </ol>
         </section>
       </div>

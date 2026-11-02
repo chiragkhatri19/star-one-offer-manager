@@ -270,7 +270,7 @@ $('[data-confirm]').addEventListener('click', async () => {
   fillForm();
   $('[data-done-msg]').textContent = settings.mode === 'folder'
     ? 'Saved into the website folder on this computer.'
-    : 'The website will show the new offer in about 1–2 minutes. You can close this app.';
+    : 'The website shows the new offer within about a minute. You can close this app.';
   step('done');
 });
 $('[data-open-site]').addEventListener('click', () => settings.siteUrl && window.om.openUrl(settings.siteUrl));
@@ -312,42 +312,43 @@ async function renderHistory() {
 }
 
 // ---------- settings ----------
-let mode = 'github';
-function setMode(m) {
-  mode = m;
-  $$('[data-mode-btn]').forEach((b) => b.classList.toggle('is-on', b.dataset.modeBtn === m));
-  $$('[data-mode-pane]').forEach((p) => (p.hidden = p.dataset.modePane !== m));
-}
-$$('[data-mode-btn]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.modeBtn)));
 function fillSettings() {
-  ['repo', 'branch', 'folder', 'file', 'siteUrl'].forEach((k) => ($(`[data-s="${k}"]`).value = settings[k] || ''));
-  $('[data-s="token"]').value = '';
-  $('[data-token-state]').textContent = settings.hasToken ? 'saved securely' : 'not saved yet';
-  setMode(settings.mode || 'github');
+  $('[data-s="siteUrl"]').value = settings.siteUrl || '';
+  $('[data-s="pass"]').value = '';
+  $('[data-pass-state]').textContent = settings.hasPass ? 'saved securely' : 'not saved yet';
 }
 async function saveSettings() {
-  const next = { mode };
-  ['repo', 'branch', 'folder', 'file', 'siteUrl'].forEach((k) => (next[k] = $(`[data-s="${k}"]`).value.trim()));
-  const tok = $('[data-s="token"]').value.trim();
-  if (tok) next.token = tok;
+  const next = { siteUrl: $('[data-s="siteUrl"]').value.trim() };
+  const pass = $('[data-s="pass"]').value.trim();
+  if (pass) next.pass = pass;
   const res = await window.om.saveSettings(next);
   if (res.ok) settings = res.settings;
   fillSettings();
   return res;
 }
+async function testAndLoad() {
+  const r = await window.om.testConnection();
+  if (r.ok) {
+    live = { prices: [], ...r.offer };
+    renderLive();
+    draft = structuredClone(live);
+    waAuto = !draft.whatsapp || draft.whatsapp === autoWa(draft);
+    fillForm();
+  }
+  return r;
+}
 $('[data-save-settings]').addEventListener('click', async () => {
   await saveSettings();
-  const r = await loadLive();
-  if (r.ok) { draft = structuredClone(live); fillForm(); toast('Settings saved · connected'); }
-  else toast('Settings saved');
+  const r = await testAndLoad();
+  toast(r.ok ? 'Saved · connected to the website' : `Saved · ${r.error}`);
 });
 $('[data-test-btn]').addEventListener('click', async () => {
   const t = $('[data-test]');
   t.className = 'test mono';
   t.textContent = 'Testing…';
   await saveSettings();
-  const r = await loadLive();
-  if (r.ok) { t.classList.add('is-ok'); t.textContent = `Connected · current offer: ${r.offer.active ? r.offer.name : 'off'}`; draft = structuredClone(live); fillForm(); }
+  const r = await testAndLoad();
+  if (r.ok) { t.classList.add('is-ok'); t.textContent = `Connected · password OK · current offer: ${r.offer.active ? r.offer.name : 'off'}`; }
   else { t.classList.add('is-bad'); t.textContent = r.error; }
 });
 
@@ -360,8 +361,5 @@ $('[data-test-btn]').addEventListener('click', async () => {
   waAuto = !draft.whatsapp || draft.whatsapp === autoWa(draft);
   if (!draft.whatsapp) draft.whatsapp = autoWa(draft);
   if (touched) refresh(); else fillForm();
-  if (!r.ok) {
-    const configured = settings.mode === 'folder' ? settings.folder : settings.repo && settings.hasToken;
-    if (!configured) { go('settings'); toast('Connect the app to the website first'); }
-  }
+  if (settings.mode !== 'folder' && !settings.hasPass) { go('settings'); toast('Type the Offer Manager password once to start'); }
 })();
