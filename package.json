@@ -1,0 +1,26 @@
+{
+  "name": "star-one-offer-manager",
+  "productName": "Star One Offer Manager",
+  "version": "1.0.0",
+  "description": "Desktop app for Star One Gym to change the website offer without touching code",
+  "author": "Chirag Khatri (chiragships.site)",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable nsis"
+  },
+  "devDependencies": {
+    "electron": "44.8.0",
+    "electron-builder": "26.17.0"
+  },
+  "build": {
+    "appId": "site.chiragships.staronegym.offermanager",
+    "productName": "Star One Offer Manager",
+    "directories": { "output": "release", "buildResources": "build" },
+    "files": ["src/**/*", "package.json"],
+    "win": { "icon": "build/icon.png", "artifactName": "StarOne-Offer-Manager-${version}-${arch}.${ext}" },
+    "portable": { "artifactName": "StarOne-Offer-Manager-${version}-portable.exe" },
+    "nsis": { "oneClick": true, "artifactName": "StarOne-Offer-Manager-${version}-setup.exe", "shortcutName": "Star One Offer Manager" }
+  }
+}

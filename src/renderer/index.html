@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'" />
+  <title>Star One Offer Manager</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ===== Title bar (window controls are drawn by Windows on the right) ===== -->
+  <header class="titlebar">
+    <img class="titlebar__crest" src="img/crest.webp" alt="" />
+    <img class="titlebar__word" src="img/wordmark.webp" alt="Star One Gym" />
+    <span class="titlebar__app mono">Offer Manager</span>
+    <span class="livepill mono" data-live><i></i><span>Checking website…</span></span>
+  </header>
+
+  <div class="shell">
+    <!-- ===== Navigation ===== -->
+    <nav class="rail">
+      <button class="rail__btn is-active" data-nav="offer">
+        <svg viewBox="0 0 24 24"><path d="M3 11.5V4a1 1 0 0 1 1-1h7.5l9.2 9.2a1.5 1.5 0 0 1 0 2.1l-6.4 6.4a1.5 1.5 0 0 1-2.1 0L3 11.5z"/><circle cx="7.5" cy="7.5" r="1.6"/></svg>
+        <span>Offer</span>
+      </button>
+      <button class="rail__btn" data-nav="history">
+        <svg viewBox="0 0 24 24"><path d="M12 7v5l3 2"/><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3 4v4h4"/></svg>
+        <span>History</span>
+      </button>
+      <button class="rail__btn" data-nav="settings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <span>Settings</span>
+      </button>
+      <div class="rail__foot mono" data-conn>Not connected</div>
+    </nav>
+
+    <!-- ===== OFFER ===== -->
+    <main class="view is-active" data-view="offer">
+      <div class="editor">
+        <div class="editor__scroll">
+          <div class="head">
+            <p class="eyebrow mono"><span class="tri"></span>Website offer</p>
+            <h1 class="h1">Change the offer</h1>
+            <p class="lead">Edit the offer below and check the preview. Nothing changes on the website until you press <b>Publish</b>.</p>
+          </div>
+
+          <div class="templates">
+            <span class="templates__lbl mono">Start from</span>
+            <button class="chipbtn" data-template="diwali">Diwali Dhamaka</button>
+            <button class="chipbtn" data-template="newyear">New Year</button>
+            <button class="chipbtn" data-template="summer">Summer Shred</button>
+            <button class="chipbtn" data-template="monthend">Month-end</button>
+            <button class="chipbtn chipbtn--ghost" data-template="blank">Blank</button>
+          </div>
+
+          <section class="card">
+            <div class="card__head"><span class="card__num mono">01</span><h2>What's the offer?</h2></div>
+            <div class="grid">
+              <label class="field span2">
+                <span class="field__lbl">Offer name <em data-count="name"></em></span>
+                <input data-f="name" maxlength="40" placeholder="Diwali Dhamaka" />
+              </label>
+              <label class="field">
+                <span class="field__lbl">Big line <em data-count="headline"></em></span>
+                <input data-f="headline" maxlength="16" placeholder="+1 month" />
+              </label>
+              <label class="field">
+                <span class="field__lbl">Gold word <em data-count="highlight"></em></span>
+                <input data-f="highlight" maxlength="14" placeholder="extra" />
+              </label>
+              <label class="field span2">
+                <span class="field__lbl">Small line under it <em data-count="detail"></em></span>
+                <input data-f="detail" maxlength="70" placeholder="on 3, 6 and 12-month plans" />
+              </label>
+              <label class="field span2">
+                <span class="field__lbl">Banner at the top of the website <em data-count="chip"></em></span>
+                <div class="inrow">
+                  <input data-f="chip" maxlength="44" placeholder="Diwali · +1 month extra" />
+                  <button class="minibtn" data-auto-chip type="button">Auto</button>
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card__head"><span class="card__num mono">02</span><h2>How long does it run?</h2></div>
+            <div class="grid">
+              <label class="field">
+                <span class="field__lbl">Last day of the offer</span>
+                <input type="date" data-f="until" />
+              </label>
+              <div class="field">
+                <span class="field__lbl">Quick pick</span>
+                <div class="quick">
+                  <button class="minibtn" type="button" data-days="3">3 days</button>
+                  <button class="minibtn" type="button" data-days="7">1 week</button>
+                  <button class="minibtn" type="button" data-days="15">15 days</button>
+                  <button class="minibtn" type="button" data-days="eom">Month end</button>
+                </div>
+              </div>
+              <div class="span2 runbar">
+                <label class="switch">
+                  <input type="checkbox" data-f="active" />
+                  <span class="switch__track"><span class="switch__dot"></span></span>
+                  <span class="switch__lbl">Show this offer on the website</span>
+                </label>
+                <span class="runbar__note mono" data-runs></span>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card__head"><span class="card__num mono">03</span><h2>Plan prices <span class="opt">optional</span></h2></div>
+            <p class="hint">Leave this empty to keep prices private. People then ask for the price on WhatsApp, like today.</p>
+            <div class="prices" data-prices></div>
+            <button class="minibtn minibtn--add" type="button" data-add-price>+ Add a plan price</button>
+          </section>
+
+          <section class="card">
+            <div class="card__head"><span class="card__num mono">04</span><h2>WhatsApp</h2></div>
+            <div class="grid">
+              <label class="field span2">
+                <span class="field__lbl">Message people send when they tap the offer</span>
+                <textarea data-f="whatsapp" rows="2" maxlength="300"></textarea>
+              </label>
+              <label class="field">
+                <span class="field__lbl">Button text <em data-count="button"></em></span>
+                <input data-f="button" maxlength="26" placeholder="Claim on WhatsApp" />
+              </label>
+              <div class="field">
+                <span class="field__lbl">Sent to</span>
+                <div class="static mono">+91 73002 80644</div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer class="actionbar">
+          <div class="actionbar__state" data-state><i></i><span>Loading…</span></div>
+          <button class="btn btn--ghost" data-revert type="button">Undo changes</button>
+          <button class="btn btn--gold" data-publish type="button">
+            Publish to website
+            <svg viewBox="0 0 24 24"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg>
+          </button>
+        </footer>
+      </div>
+
+      <!-- Live preview: mirrors the website's own styles -->
+      <aside class="preview">
+        <div class="preview__bar">
+          <span class="mono">Live preview</span>
+          <div class="seg" data-seg>
+            <button class="is-on" data-pv="top">Top of site</button>
+            <button data-pv="card">Offer card</button>
+          </div>
+        </div>
+        <div class="phone">
+          <div class="phone__notch"></div>
+          <div class="phone__screen" data-screen>
+            <div class="site site--top">
+              <div class="site__nav"><img src="img/wordmark.webp" alt="" /><span class="site__status mono"><i></i>Open now</span></div>
+              <div class="site__hero">
+                <img class="site__word" src="img/wordmark.webp" alt="" />
+                <p class="site__tag mono">Train today <b>•</b> Stronger tomorrow</p>
+              </div>
+              <div class="site__bottom">
+                <span class="site__chip mono" data-pv-chipwrap><i></i><span data-pv-chip></span> →</span>
+                <p class="site__title">Walk the floor<br />before you <span class="g">walk in.</span></p>
+                <p class="site__sub">Front door to rooftop turf in one scroll.</p>
+                <div class="site__ctas"><span class="sbtn sbtn--gold">Start the tour ↓</span><span class="sbtn">WhatsApp us</span></div>
+              </div>
+            </div>
+            <div class="site site--card">
+              <p class="site__eyebrow mono">▲ Membership</p>
+              <p class="site__h2">Pick your run. <span>Ask for today's price.</span></p>
+              <div class="ocard" data-pv-card>
+                <span class="ocard__tag mono" data-pv-tag></span>
+                <span class="ocard__big"><span data-pv-headline></span> <span class="g" data-pv-highlight></span></span>
+                <span class="ocard__copy" data-pv-detail></span>
+                <span class="ocard__prices mono" data-pv-prices></span>
+                <span class="sbtn sbtn--gold" data-pv-button></span>
+              </div>
+              <div class="plans"><span><b>1</b>Month</span><span><b>3</b>Months</span><span><b>6</b>Months</span><span><b>12</b>Months</span></div>
+            </div>
+            <div class="site__off" data-pv-off>
+              <b>Offer is off</b>
+              <span>The website shows no offer banner or offer card.</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- ===== HISTORY ===== -->
+    <main class="view" data-view="history">
+      <div class="page">
+        <div class="head">
+          <p class="eyebrow mono"><span class="tri"></span>Past offers</p>
+          <h1 class="h1">History</h1>
+          <p class="lead">Every offer published from this computer. Use one again in a click.</p>
+        </div>
+        <div class="history" data-history></div>
+      </div>
+    </main>
+
+    <!-- ===== SETTINGS ===== -->
+    <main class="view" data-view="settings">
+      <div class="page">
+        <div class="head">
+          <p class="eyebrow mono"><span class="tri"></span>Connection</p>
+          <h1 class="h1">Settings</h1>
+          <p class="lead">Set up once by Chirag. After that you only use the Offer screen.</p>
+        </div>
+
+        <section class="card">
+          <div class="card__head"><span class="card__num mono">01</span><h2>Where offers are published</h2></div>
+          <div class="seg seg--wide" data-mode>
+            <button data-mode-btn="github">Live website (GitHub)</button>
+            <button data-mode-btn="folder">Folder on this PC (testing)</button>
+          </div>
+          <div class="grid" data-mode-pane="github">
+            <label class="field"><span class="field__lbl">Website repository</span><input data-s="repo" placeholder="owner/star-one-gym" /></label>
+            <label class="field"><span class="field__lbl">Branch</span><input data-s="branch" placeholder="main" /></label>
+            <label class="field span2">
+              <span class="field__lbl">GitHub access key <em data-token-state></em></span>
+              <input data-s="token" type="password" placeholder="github_pat_…" autocomplete="off" />
+            </label>
+          </div>
+          <div class="grid" data-mode-pane="folder" hidden>
+            <label class="field span2"><span class="field__lbl">Website folder</span><input data-s="folder" placeholder="C:\project 2026\star-one-gym\website" /></label>
+          </div>
+          <div class="grid">
+            <label class="field"><span class="field__lbl">Offer file inside the website</span><input data-s="file" placeholder="src/data/offer.json" /></label>
+            <label class="field"><span class="field__lbl">Website address</span><input data-s="siteUrl" placeholder="https://staronegym.in" /></label>
+          </div>
+          <div class="settings__actions">
+            <span class="test mono" data-test></span>
+            <button class="btn btn--ghost" data-test-btn type="button">Test connection</button>
+            <button class="btn btn--gold" data-save-settings type="button">Save settings</button>
+          </div>
+        </section>
+
+        <section class="card card--note">
+          <h2>How publishing works</h2>
+          <ol class="how">
+            <li><b>Publish</b> saves the offer into the website's code on GitHub.</li>
+            <li>Cloudflare sees the change and rebuilds the website by itself.</li>
+            <li>About <b>1–2 minutes</b> later the new offer is live for everyone.</li>
+            <li>After the last day, the offer hides itself. No need to turn it off.</li>
+          </ol>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== Publish dialog ===== -->
+  <div class="modal" data-modal hidden>
+    <div class="modal__card">
+      <div data-step="confirm">
+        <p class="eyebrow mono"><span class="tri"></span>Ready to publish</p>
+        <h3 class="modal__h">Put this live on the website?</h3>
+        <dl class="summary" data-summary></dl>
+        <div class="modal__actions">
+          <button class="btn btn--ghost" data-close type="button">Not yet</button>
+          <button class="btn btn--gold" data-confirm type="button">Yes, publish</button>
+        </div>
+      </div>
+      <div data-step="busy" hidden>
+        <div class="spinner"></div>
+        <h3 class="modal__h">Publishing…</h3>
+        <p class="lead">Sending the new offer to the website.</p>
+      </div>
+      <div data-step="done" hidden>
+        <div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        <h3 class="modal__h">Published</h3>
+        <p class="lead" data-done-msg></p>
+        <div class="modal__actions">
+          <button class="btn btn--ghost" data-close type="button">Done</button>
+          <button class="btn btn--gold" data-open-site type="button">Open website</button>
+        </div>
+      </div>
+      <div data-step="error" hidden>
+        <div class="tick tick--err"><svg viewBox="0 0 24 24"><path d="M12 7v6m0 4h.01"/></svg></div>
+        <h3 class="modal__h">Couldn't publish</h3>
+        <p class="lead" data-err-msg></p>
+        <div class="modal__actions">
+          <button class="btn btn--ghost" data-close type="button">Close</button>
+          <button class="btn btn--gold" data-goto-settings type="button">Open settings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" data-toast hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
